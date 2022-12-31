@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.store.dao.OrderMapper">
+
+    <resultMap id="fullOrder" type="com.store.entity.Order" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="time" column="time"></result>
+        <result property="storeId" column="store_id"></result>
+        <result property="customerName" column="customer_name"></result>
+        <result property="remark" column="remark"></result>
+        <result property="status" column="status"></result>
+        <association property="address" column="address" select="com.store.dao.AddressMapper.getAddressById"></association>
+        <collection property="items" column="id" select="com.store.dao.OrderMapper.getOrderItemsByOrder"></collection>
+    </resultMap>
+    <resultMap id="orderItem" type="com.store.entity.OrderItem" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="count" column="count"></result>
+        <association property="product" column="{id=product_id}" select="com.store.dao.ProductMapper.getProductById"></association>
+    </resultMap>
+    <insert id="addOrder">
+        insert into `order` values (#{order.id},#{order.customerName},#{order.storeId},#{order.time},#{order.status},#{order.remark},#{order.address.id})
+    </insert>
+    <insert id="addOrderItem">
+        insert into order_item values (#{item.id},#{item.product.id},#{item.count},#{parent})
+    </insert>
+    <insert id="addCart">
+        insert into `order` values (#{order.id},#{order.customerName},#{order.storeId},#{order.time},#{order.status},#{order.remark},null)
+    </insert>
+    <update id="setOrderStatus">
+        update `order` set
+            status = #{status}
+        where id = #{id}
+    </update>
+    <update id="setOrderAddress">
+        update `order` set
+            address = #{address}
+        where id = #{id}
+    </update>
+    <update id="setOrderTime">
+        update `order` set
+            time = #{time}
+        where id = #{id}
+    </update>
+    <delete id="removeOrder">
+        delete from `order`
+        where id = #{id}
+    </delete>
+    <delete id="removeOrderByProduct">
+        delete from `order`
+        where exists(
+            select * from order_item
+            where `order`.id = order_item.parent_id
+                and order_item.product_id = #{id}
+            )
+    </delete>
+    <select id="getOrdersByStoreId" resultMap="fullOrder">
+        select * from `order`
+            where store_id = #{id}
+            and status between 1 and 2
+    </select>
+    <select id="getOrderItemsByOrder" resultMap="orderItem">
+        select * from order_item
+            where parent_id = #{id}
+    </select>
+    <select id="getOrdersByUser" resultMap="fullOrder">
+        select * from `order`
+            where customer_name = #{user}
+                and status between 1 and 3
+            order by time
+    </select>
+    <select id="getCartByUser" resultMap="fullOrder">
+        select * from `order`
+            where customer_name = #{user}
+                and status = 0
+            order by time
+    </select>
+</mapper>

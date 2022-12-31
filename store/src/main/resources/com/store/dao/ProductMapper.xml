@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.store.dao.ProductMapper">
+    <resultMap id="fullProduct" type="com.store.entity.Product" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="storeId" column="store_id"></result>
+        <collection property="labels" column="id" select="com.store.dao.ProductMapper.getProductLabels"/>
+    </resultMap>
+    <insert id="addProduct">
+        insert into product values(#{product.id},#{product.name},#{store},#{product.price},#{product.quantity},#{product.description},#{product.picturePath})
+    </insert>
+    <insert id="addLabels">
+        insert into product_label values (#{id},#{productId},#{label})
+    </insert>
+    <update id="updateProduct">
+        update product set
+            name = #{product.name},
+            price = #{product.price},
+            quantity = #{product.quantity},
+            description = #{product.description},
+            picturePath = #{product.picturePath}
+        where id = #{product.id}
+    </update>
+    <delete id="deleteById">
+        delete from product where id = #{id}
+    </delete>
+    <delete id="deleteLabelsByProduct">
+        delete from product_label where product_id = #{id}
+    </delete>
+    <select id="getProductsByStoreId" resultMap="fullProduct">
+        select * from product
+            where store_id = #{id}
+    </select>
+    <select id="getProductLabels" parameterType="string" resultType="com.store.entity.ProductLabel">
+        select `label` from product_label
+            where product_id = #{id}
+    </select>
+    <select id="getProductByLabelAndLimit" resultMap="fullProduct">
+        select product.id as id,
+               product.name as name,
+               product.price as price,
+               product.quantity as quantity,
+               product.description as description,
+               product.picturePath as picturePath
+        from product left outer join product_label on product.id = product_label.product_id
+        where product_label.label=#{label}
+        limit #{skip},#{take}
+    </select>
+    <select id="getProductByLimit" resultMap="fullProduct">
+        select * from product
+        limit #{skip},#{take}
+    </select>
+    <select id="searchProduct" resultMap="fullProduct">
+        select * from product
+            where name like '%${segment}%'
+            limit #{skip},#{take}
+    </select>
+    <select id="getProductById" resultMap="fullProduct">
+        select * from product
+            where id =#{id}
+    </select>
+    <select id="countByLabel" resultType="java.lang.Integer">
+        select count(*)
+        from product left outer join product_label on product.id = product_label.product_id
+        where product_label.label=#{label}
+    </select>
+    <select id="countBySegment" resultType="java.lang.Integer">
+        select count(*) from product
+        where name like '%${segment}%'
+    </select>
+    <select id="countAll" resultType="java.lang.Integer">
+        select count(*) from product
+    </select>
+    <select id="getQuantityById" resultType="java.lang.Integer">
+        select quantity from product
+        where id = #{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.store.dao.AddressMapper">
+
+    <resultMap id="fullAddress" type="com.store.entity.Address" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="district" column="district"></result>
+        <result property="detail" column="detail"></result>
+        <association property="point">
+            <result property="lat" column="latitude"></result>
+            <result property="lng" column="longitude"></result>
+        </association>
+    </resultMap>
+    <insert id="addAddress">
+        insert into address values (#{address.id},#{user},#{address.point.lng},#{address.point.lat},#{address.district},#{address.detail})
+    </insert>
+    <delete id="deleteById">
+        delete  from address
+        where id = #{id}
+    </delete>
+
+    <select id="getAddressById" resultMap="fullAddress">
+        select * from address
+        where id = #{id}
+    </select>
+    <select id="getAddressedByUser" resultMap="fullAddress">
+        select * from address
+        where user = #{user}
+    </select>
+</mapper>

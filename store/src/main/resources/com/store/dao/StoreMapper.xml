@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.store.dao.StoreMapper">
+    <resultMap id="fullStore" type="com.store.entity.Store" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <collection property="products" column="id" select="com.store.dao.ProductMapper.getProductsByStoreId"></collection>
+        <collection property="orders" column="id" select="com.store.dao.OrderMapper.getOrdersByStoreId"></collection>
+    </resultMap>
+
+    <resultMap id="cusStore" type="com.store.entity.Store" autoMapping="true">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <collection property="products" column="id" select=""></collection>
+    </resultMap>
+    <insert id="addStore">
+        insert into store values (#{id},#{name},#{owner})
+    </insert>
+
+    <select id="getFullStoreByOwner" resultMap="fullStore">
+        select * from store
+            where owner_name = #{owner}
+    </select>
+    <select id="getFullStore" resultMap="fullStore">
+        select * from store
+            where id = #{id}
+    </select>
+
+</mapper>
